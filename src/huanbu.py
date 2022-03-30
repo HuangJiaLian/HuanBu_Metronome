@@ -292,7 +292,7 @@ def tap_callback():
     global time_list, bpm, scale
     new_flag = True
     time_list.append(time.time())
-    print(time_list)
+    # print(time_list)
     if len(time_list) > 1:
         if time_list[-1] - time_list[-2] > 3:
             time_list = []
@@ -307,7 +307,7 @@ def tap_callback():
                 bpm = speed_range[-1]
             scale.set(bpm) 
             update_speed_name()
-    print(bpm)
+    # print(bpm)
 
 count_label =tk.Label(rightFrame, text=num_counts[0], fg='#FFFFE6', bg ='#52767D', width=3, font=(theme_fonts[0], 180, 'bold'), justify='left')
 count_label.pack(fill='both', expand=1)
