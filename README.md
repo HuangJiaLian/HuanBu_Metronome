@@ -1,6 +1,7 @@
-<img src='./src/huanbu.png' width='50%'/>
+<img src='https://cdn.jsdelivr.net/gh/HuangJiaLian/DataBase0@master/uPic/2022_03_30_22_huanbu.png' width='10%'/>
 
-一个简洁的节拍器。
+一个简洁的节拍器
+
 - 跨平台, 支持Windows, Linux, macOS
 - 空格键[Space] 开始/暂停
 - 左右键[Left/Right] 调速度
