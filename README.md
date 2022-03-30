@@ -1,5 +1,6 @@
 # 缓步节拍器
 一个简洁的节拍器。
+- 跨平台, 支持Windows, Linux, macOS
 - 空格键[Space] 开始/暂停
 - 左右键[Left/Right] 调速度
 - 上下键[Up/Down] 微调速度
