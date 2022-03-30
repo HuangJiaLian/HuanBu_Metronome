@@ -1,4 +1,5 @@
-# 缓步节拍器
+<img src='./src/huanbu.png' width='50%'/>
+
 一个简洁的节拍器。
 - 跨平台, 支持Windows, Linux, macOS
 - 空格键[Space] 开始/暂停
