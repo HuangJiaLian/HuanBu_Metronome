@@ -1,6 +1,10 @@
 import tkinter as tk
 from tkinter import Frame
-import simpleaudio, time
+import simpleaudio
+
+strong_beat = simpleaudio.WaveObject.from_wave_file('strong_beat.wav')
+weak_beat = simpleaudio.WaveObject.from_wave_file('weak_beat.wav')
+sub_strong_beat = simpleaudio.WaveObject.from_wave_file('sub_strong_beat.wav')
 
 theme_colors = {'bg': '#52767D', 'text':'#FFFFE6', 'label_bg':'#3D998D', 'scale_through':'#A3CEC5'}
 theme_fonts = ['Helvetica']
@@ -46,6 +50,16 @@ marking_label =tk.Label(midFrame, text='Allegretto', font=(theme_fonts[0], 90, '
                       justify='center', fg = theme_colors['text'], bg = theme_colors['label_bg'], anchor='n')
 marking_label.pack(fill='both', expand=1)
 
+
+# Variable for the scale value
+scale_var = tk.IntVar(midFrame)
+
+# When scale changes 
+def update(*args):
+    global scale_var, time_signature, interval_ms, tempo
+    tempo = scale_var.get()
+    interval_ms = int((60/tempo) * (4/time_signature[-1]) * 1000)
+
 # Use a scale to show the tempo range
 scale = tk.Scale(midFrame,
              from_=tempo_range[0],
@@ -58,7 +72,9 @@ scale = tk.Scale(midFrame,
              activebackground = theme_colors['text'],
              bg = theme_colors['label_bg'],
              sliderlength = 30,
-             font=(theme_fonts[0]))
+             font=(theme_fonts[0]),
+             variable=scale_var,
+             command=update)
 scale.set(defaults['tempo'])
 scale.pack(side='bottom',fill='both', expand='0')
 
@@ -66,5 +82,38 @@ scale.pack(side='bottom',fill='both', expand='0')
 # Label to show click number in a measure
 count_label =tk.Label(rightFrame, text='0', fg=theme_colors['text'], bg =theme_colors['bg'], width=3, font=(theme_fonts[0], 180, 'bold'), justify='left')
 count_label.pack(fill='both', expand=1)
+
+
+# When time signature mode changes
+def update_time_signature(*args):
+    global temp, time_signature, count, interval_ms
+    time_signature = time_signatures[ts_mode.get()][-1]
+    interval_ms = int((60/tempo) * (4/time_signature[-1]) * 1000)
+    count = 0
+ts_mode.trace('w', update_time_signature)
+
+# Time signature selection implementation
+time_signature = time_signatures[ts_mode.get()][-1]
+tempo = 120
+interval_ms = int((60/tempo) * (4/time_signature[-1]) * 1000)
+count = 0
+def play():
+    global count, time_signature
+    count += 1
+    if time_signature[0] == -1:
+        strong_beat.play()
+    else:
+        if count == 1:
+            strong_beat.play()
+        else:
+            if time_signature[-1] == 8 and count % 3 == 1:
+                sub_strong_beat.play()
+            else:
+                weak_beat.play()
+    if count == time_signature[0]:
+        count = 0
+    window.after(interval_ms, play)
+window.after(interval_ms, play)
+
 
 window.mainloop()

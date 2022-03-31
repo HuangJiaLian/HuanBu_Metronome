@@ -2,6 +2,10 @@ import tkinter as tk
 from tkinter import Frame
 import simpleaudio, time
 
+strong_beat = simpleaudio.WaveObject.from_wave_file('strong_beat.wav')
+weak_beat = simpleaudio.WaveObject.from_wave_file('weak_beat.wav')
+sub_strong_beat = simpleaudio.WaveObject.from_wave_file('sub_strong_beat.wav')
+
 theme_colors = {'bg': '#52767D', 'text':'#FFFFE6', 'label_bg':'#3D998D', 'scale_through':'#A3CEC5'}
 theme_fonts = ['Helvetica']
 tempo_range = [30, 230]
@@ -36,6 +40,7 @@ for mode in time_signatures.keys():
         radio_button.select()
     radio_button.pack(fill='x')
 
+
 # In middle frame
 # Label to show tempo 
 tempo_label =tk.Label(midFrame, text='120', font=(theme_fonts[0], 90, 'bold'),
@@ -66,5 +71,17 @@ scale.pack(side='bottom',fill='both', expand='0')
 # Label to show click number in a measure
 count_label =tk.Label(rightFrame, text='0', fg=theme_colors['text'], bg =theme_colors['bg'], width=3, font=(theme_fonts[0], 180, 'bold'), justify='left')
 count_label.pack(fill='both', expand=1)
+
+
+# Play beats in Tkinter
+tempo = 120
+time_signature = time_signatures[ts_mode.get()][-1]
+interval_ms = int((60/tempo) * (4/time_signature[-1]) * 1000)
+
+def play():
+    strong_beat.play()
+    window.after(interval_ms, play)
+
+window.after(interval_ms, play)
 
 window.mainloop()
