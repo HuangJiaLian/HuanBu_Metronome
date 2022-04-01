@@ -2,7 +2,7 @@
 rm -r build dist/*
 
 # Create app file using pyinstaller
-pyinstaller --name 'Huanbu' --icon 'huanbu.ico' --windowed  --add-data='metronome.wav:.' --add-data='metronomeup.wav:.' --add-data='metronomeup_2.wav:.' huanbu.py
+pyinstaller --name 'Huanbu' --icon 'huanbu.ico' --windowed  --add-data='strong_beat.wav:.' --add-data='sub_strong_beat.wav:.' --add-data='weak_beat.wav:.' huanbu.py
 
 # Create a folder (named dmg) to prepare our DMG in (if it doesn't already exist).
 mkdir -p dist/dmg

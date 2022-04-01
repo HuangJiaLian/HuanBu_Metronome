@@ -1,71 +1,26 @@
-# http://c.biancheng.net/tkinter/scale-widget.html
-# https://ritza.co/articles/note-generator-article/
-# https://py2app.readthedocs.io/en/latest/tutorial.html
-# https://www.pythonguis.com/tutorials/packaging-pyqt5-applications-pyinstaller-macos-dmg/
-# https://cloudconvert.com/
-
-import time, simpleaudio, os
+import time, os
 import tkinter as tk
-from tkinter import Frame, PhotoImage, Menu, messagebox
+from tkinter import Frame
+import simpleaudio
 
 basedir = os.path.dirname(__file__)
+strong_beat = simpleaudio.WaveObject.from_wave_file(os.path.join(basedir,'strong_beat.wav'))
+weak_beat = simpleaudio.WaveObject.from_wave_file(os.path.join(basedir,'weak_beat.wav'))
+sub_strong_beat = simpleaudio.WaveObject.from_wave_file(os.path.join(basedir,'sub_strong_beat.wav'))
 
-num_counts_en = ['0','1','2','3','4','5','6','7','8','9']
-num_counts_cn = ['零','壹','贰','叁','肆','伍','陆','柒','捌','玖']
-
-num_counts = num_counts_en
-
-speeds_en = {
-    'Largo': [40, 60],
-    'Adagio': [66 ,76],
-    'Andante': [76, 108],
-    'Allegretto': [112, 120],
-    'Allegro': [120, 156],
-    'Presto':[168, 200],
-    'Prestissimo':[200, 330],
-}
-
-speeds_cn = {
-    '最缓板': [40, 60],
-    '柔板': [66 ,76],
-    '行板': [76, 108],
-    '小快板': [112, 120],
-    '快板': [120, 156],
-    '急板':[168, 200],
-    '最急板':[200, 330],
-}
-
-
-
-speeds = speeds_cn
-
-window =tk.Tk()
-window.title('Huanbu Metronome')
-
-
-#创建一个执行函数，点击下拉菜单中命令时执行
-def show_usage() :
-    messagebox.showinfo(title='Usage', message='Shortcuts are strongly recommended.\nSpace:\tPlay/Pause\nM:\t\tMode Change\nT:\t\tTap Estimate\nUp/Right:\tTempo+\nDown/Left:\tTempo-')
-
-mainmenu = Menu(window)
-
-
-filemenu = Menu (mainmenu, tearoff=False)
-filemenu.add_command (label="Useage", command=show_usage,accelerator="U")
-filemenu.add_command (label="Quit",command=window.quit, accelerator="Q")
-mainmenu.add_cascade (label="Help",menu=filemenu)
-window.config (menu=mainmenu)
-
-
-window.geometry('912x325')
-theme_colors = ['#ffffff','#52767D']
+theme_colors = {'bg': '#52767D', 'text':'#FFFFE6', 'label_bg':'#3D998D', 'scale_through':'#A3CEC5'}
 theme_fonts = ['Helvetica']
-window["background"] = theme_colors[0]
-scale_length = 550
+tempo_range = [30, 230]
+defaults = {'tempo': 120, 'scale_length': 550}
 
+# The main window
+window = tk.Tk()
+window.title('Metronome')
+window.geometry('900x300')
 
-leftFrame = Frame(window, height=300)
-leftFrame.config(bg="#52767D")
+# Three frames are created
+leftFrame = Frame(window)
+leftFrame.config(bg=theme_colors['bg'])
 leftFrame.pack(side='left',fill='both')
 
 midFrame = Frame(window)
@@ -73,246 +28,184 @@ midFrame.pack(side='left', fill='both')
 
 rightFrame = Frame(window)
 rightFrame.pack(side='left', fill='both', expand=1)
- 
-ON = False
-bpm = 120
-delay = 60/bpm
-count = 0
-beat = 0
+
+# In left frame
+time_signatures = {0: [' 2 / 4', (2, 4)], 1: [' 3 / 4',(3 ,4)], 2: [' 4 / 4',(4, 4)], 3: [' 2 / 2',(2, 2)],
+                   4: [' 6 / 8',(6, 8)], 5: [' 9 / 8',(9, 8)], 6: ['12/ 8',(12, 8)],
+                   7: [' * / 4',(-1, 4)], 8: [' * / 2',(-1,2)], 9: [' * / 8',(-1,8)]}
+
+ts_mode = tk.IntVar(leftFrame)
+for mode in time_signatures.keys():
+    radio_button = tk.Radiobutton(leftFrame, text = time_signatures[mode][0], variable = ts_mode,
+                    value = mode, fg=theme_colors['text'],
+                    bg=theme_colors['bg'], anchor='w', font=(theme_fonts[0], 17))
+    if time_signatures[mode][-1] == (4, 4): # Select 4/4 by default
+        radio_button.select()
+    radio_button.pack(fill='x')
+
+# In middle frame
+# Label to show tempo 
+tempo_label =tk.Label(midFrame, text='120', font=(theme_fonts[0], 90, 'bold'),
+                      justify='center', fg = theme_colors['text'], bg = theme_colors['label_bg'], anchor='s')
+tempo_label.pack(fill='both', expand=1)
+
+marking_label =tk.Label(midFrame, text='Allegretto', font=(theme_fonts[0], 90, 'bold'),
+                      justify='center', fg = theme_colors['text'], bg = theme_colors['label_bg'], anchor='n')
+marking_label.pack(fill='both', expand=1)
+
+markings = {'Largo': [40, 60], 'Adagio': [66 ,76], 'Andante': [76, 108],
+            'Allegretto': [112, 120], 'Allegro': [120, 156], 'Presto':[168, 200],
+            'Prestissimo':[200, 330]}
 
 
-mode = [4, 4]
-
-speed_range = [30, 230]
-
-wave_a = simpleaudio.WaveObject.from_wave_file(os.path.join(basedir,'metronome.wav'))
-wave_b = simpleaudio.WaveObject.from_wave_file(os.path.join(basedir,'metronomeup.wav'))
-wave_c = simpleaudio.WaveObject.from_wave_file(os.path.join(basedir,'metronomeup_2.wav'))
-
-def metronome():
-    time_t1 = time.time()
-    global ON, bpm, count, mode, beat, wave_a, wave_b, time_list, tap, count_label
-    if len(time_list) > 0 and time_t1 - time_list[-1] > 3: 
-        time_list = []
-    delay = (60/bpm)/(mode[1]/4)
-    if ON:
-        count += 1
-        # -1/4, 4/4 , or 3/4
-        if mode[1] == 4:
-            if mode[0] != -1:
-                wave_a.play() if count != 1 else wave_b.play()
-            else:
-                wave_a.play()
-        # 6/8
-        if mode[1] == 8:
-            if count == 1:
-                wave_b.play()
-            elif count == 4:
-                wave_c.play()
-            else:
-                wave_a.play()
-        # print(beat, count)
-        # count_label['text'] = num_counts[count]
-        count_label['text'] = str(count)
-        if count >= mode[0] and mode[0] > 0:
-            count = 0
-            beat += 1
-    window.after(int((delay - (time.time() - time_t1))*1000), metronome)
+# Variable for the scale value
+scale_var = tk.IntVar(midFrame)
 
 
-def update_bpm(value):
-    global bpm, ON
-    bpm = int(value)
-    update_speed_name()
-
-def key_pressed(event):
-    global ON, mode_var, modes, scale
-    if event.char == ' ':
-        ON = not ON
-        scale.set(bpm) 
-    # Loop through modes
-    elif event.char == 'm':
-        mode_var.set((mode_var.get() + 1)%len(modes))
-    # Taping 
-    elif event.char == 't':
-        tap_callback()
-    elif event.char == 'u':
-        show_usage()
-    elif event.char == 'q':
-        exit()
-        
-
-def arrow_down(event):
-    global scale, bpm, speed_range
-    if bpm - 1 >=  speed_range[0]:
-        bpm -= 1
-    scale.set(bpm) 
-    update_speed_name()
-
-def arrow_up(event):
-    global scale, bpm
-    if bpm + 1 <= speed_range[1]:
-        bpm += 1
-    scale.set(bpm) 
-    update_speed_name()
-
-def arrow_left(event):
-    global scale, bpm, speed_range
-    if bpm - 10 >= speed_range[0]:
-        bpm -= 10
-    else:
-        bpm -= (bpm-speed_range[0])
-    scale.set(bpm) 
-    update_speed_name()
-
-def arrow_right(event):
-    global scale, bpm
-    if bpm + 10 <= speed_range[1]:
-        bpm += 10
-    else:
-        bpm +=(speed_range[1]-bpm)
-    scale.set(bpm) 
-    update_speed_name()
-
-
-
-def update_speed_name():
-    global scale, bpm, speed_label, mark_label, speeds
-    speed_label['text'] = '{}'.format(bpm)
-    for key in speeds.keys():
-        if bpm >= speeds[key][0] and bpm <= speeds[key][1]:
-            mark_label['text'] =  '{}'.format(key)
+# Function to determine the tempo markings
+def tempo_marking_of(tempo):
+    for key in markings.keys():
+        if tempo >= markings[key][0] and tempo <= markings[key][1]:
+            marking = key
             break
         else:
-            mark_label['text'] =  ''
-    # print(window.winfo_width(), window.winfo_height())
+            marking = ''
+    return marking
 
+# When scale changes 
+def update(*args):
+    global scale_var, time_signature, interval_ms, tempo, tempo_label, marking_label
+    tempo = scale_var.get()
+    interval_ms = int((60/tempo) * (4/time_signature[-1]) * 1000)
+    tempo_label['text'] = '{}'.format(tempo)
+    marking = tempo_marking_of(tempo)
+    marking_label['text'] = '{}'.format(marking)
 
-
-modes = [('\u2009*/4', 0), ('4/4',1), ('3/4',2), ('2/4', 3), ('6/8',4)]
-mode_var = tk.IntVar(leftFrame)
-for name, num in modes:
-    radio_button = tk.Radiobutton(leftFrame,text = name, variable = mode_var, value =num, fg='#FFFFE6',bg='#52767D', anchor='w', font=(theme_fonts[0], 17))
-    # Select 4/4 by default
-    if name == '4/4':
-        radio_button.select()
-    radio_button.pack(fill='x')
-
-# When new mode selected
-# run this function
-def mode_var_callback(*args):
-    global mode, count 
-    selection = mode_var.get()
-    if selection == 0:
-        mode = [-1, 4]
-    elif selection == 1:
-        mode = [4, 4]
-    elif selection == 2:
-        mode = [3, 4]
-    elif selection == 3:
-        mode = [2, 4]       
-    elif selection == 4:
-        mode = [6, 8]
-    count = 0
-
-# When mode_var changes call callback
-mode_var.trace("w", mode_var_callback)
-
-languages=[('EN', 0), ('CN', 1)]
-language_var = tk.IntVar(leftFrame)
-for name, num in languages:
-    radio_button = tk.Radiobutton(leftFrame,text = name, variable = language_var, value =num, fg='#FFFFE6',bg='#52767D', anchor='w', font=(theme_fonts[0], 17))
-    if name == 'CN':
-        radio_button.select()
-    radio_button.pack(fill='x')
-
-
-def language_var_callback(*args):
-    global speeds, speeds_en, speeds_cn
-    selection = language_var.get()
-    if selection == 0:
-        speeds = speeds_en
-    elif selection == 1:
-        speeds = speeds_cn
-    update_speed_name()
-
-
-language_var.trace("w", language_var_callback)
-
-# label_play = tk.Label(leftFrame, text='帮助', fg='#FFFFE6', bg=window["background"], anchor='w')
-# # play_button = tk.Button(leftFrame,image=play_img, borderwidth=0)   
-# label_play.pack(side='top',fill='x') 
-
+# Use a scale to show the tempo range
 scale = tk.Scale(midFrame,
-             label='',
-             from_=speed_range[0],
-             to= speed_range[1],
+             from_=tempo_range[0],
+             to= tempo_range[1],
              orient=tk.HORIZONTAL,
-             length=scale_length,
+             length=defaults['scale_length'],
              showvalue=0,
-             troughcolor = '#A3CEC5',
+             troughcolor = theme_colors['scale_through'],
              bd = 0,
-             activebackground = '#FFFFE6',
-             bg = '#3D998D',
+             activebackground = theme_colors['text'],
+             bg = theme_colors['label_bg'],
              sliderlength = 30,
-            #  tickinterval=20, 
-             font=(theme_fonts[0]),   
-             command=update_bpm)
-# scale.set(bpm)
+             font=(theme_fonts[0]),
+             variable=scale_var,
+             command=update)
+scale.set(defaults['tempo'])
 scale.pack(side='bottom',fill='both', expand='0')
 
-# Label to show tempo
-# speed_label =tk.Label(midFrame, text='Press Space', font=(theme_fonts[0], 90, 'bold'),
-#                       justify='center', fg = '#FFFFE6', bg ='#3D998D', anchor='s')
-# speed_label.pack(fill='both', expand=1)
+# In right frame
+# Label to show click number in a measure
+count_label =tk.Label(rightFrame, text='0', fg=theme_colors['text'], bg =theme_colors['bg'], width=3, font=(theme_fonts[0], 180, 'bold'), justify='left')
+count_label.pack(fill='both', expand=1)
 
-# mark_label =tk.Label(midFrame, text='To Start', font=(theme_fonts[0], 90, 'bold'),
-#                       justify='center', fg = '#FFFFE6', bg ='#3D998D', anchor='n')
-# mark_label.pack(fill='both', expand=1)
 
-speed_label =tk.Label(midFrame, text='按空格', font=(theme_fonts[0], 90, 'bold'),
-                      justify='center', fg = '#FFFFE6', bg ='#3D998D', anchor='s')
-speed_label.pack(fill='both', expand=1)
+# When time signature mode changes
+def update_time_signature(*args):
+    global temp, time_signature, count, interval_ms
+    time_signature = time_signatures[ts_mode.get()][-1]
+    interval_ms = int((60/tempo) * (4/time_signature[-1]) * 1000)
+    count = 0
+ts_mode.trace('w', update_time_signature)
 
-mark_label =tk.Label(midFrame, text='开始', font=(theme_fonts[0], 90, 'bold'),
-                      justify='center', fg = '#FFFFE6', bg ='#3D998D', anchor='n')
-mark_label.pack(fill='both', expand=1)
+# Time signature selection implementation
+time_signature = time_signatures[ts_mode.get()][-1]
+tempo = 120
+interval_ms = int((60/tempo) * (4/time_signature[-1]) * 1000)
+count = 0
+ON = True
+def play():
+    global count, time_signature, count_label, ON
+    if ON:
+        count += 1
+        count_label['text'] = '{}'.format(count)
+        if time_signature[0] == -1:
+            strong_beat.play()
+        else:
+            if count == 1:
+                strong_beat.play()
+            else:
+                if time_signature[-1] == 8 and count % 3 == 1:
+                    sub_strong_beat.play()
+                else:
+                    weak_beat.play()
+        if count == time_signature[0]:
+            count = 0
+    window.after(interval_ms, play)
 
-# Keyboard interrupt
+time_list = []
+def tap_estimate():
+    global time_list, scale
+    time_list.append(time.time())
+    list_len = len(time_list)
+    N = 6
+    if list_len > 1:
+        # If two time far away from each other 
+        # throw away the former times, only left the last one
+        if time_list[-1] - time_list[-2] > 2:
+            time_list = time_list[-1:]
+        else:
+            if list_len < N:
+                interval = (time_list[-1] - time_list[0]) / (list_len - 1)
+            else:
+                interval = (time_list[-1] - time_list[-N]) / (N - 1)
+            tempo = int(60/interval)
+            scale.set(tempo)
+    else:
+        # Keep tapping 
+        pass 
+    # print(time_list)
+
+
+def key_pressed(event):
+    global ON, ts_mode, time_signatures
+    if event.char == ' ':
+        ON = not ON
+    elif event.char == 't':
+        tap_estimate()
+    elif event.char =='m':
+        ts_mode.set((ts_mode.get() + 1)%len(time_signatures))
+    elif event.char == 'q':
+        exit()
+
+def arrow_down(event):
+    global tempo, scale, tempo_range
+    if tempo -1 >= tempo_range[0]:
+        tempo -= 1
+    scale.set(tempo)
+
+def arrow_up(event):
+    global tempo, scale, tempo_range
+    if tempo +1 <= tempo_range[-1]:
+        tempo += 1
+    scale.set(tempo)
+
+def arrow_left(event):
+    global tempo, scale, tempo_range
+    if tempo - 10 >= tempo_range[0]:
+        tempo -= 10
+    else:
+        tempo -= (tempo-tempo_range[0])
+    scale.set(tempo) 
+
+def arrow_right(event):
+    global tempo, scale, tempo_range
+    if tempo + 10 <= tempo_range[1]:
+        tempo += 10
+    else:
+        tempo += (tempo_range[1]-tempo)
+    scale.set(tempo) 
+
 window.bind("<Key>",key_pressed)
 window.bind('<Down>', arrow_down)
 window.bind('<Up>', arrow_up)
 window.bind('<Left>', arrow_left)
 window.bind('<Right>', arrow_right)
 
-tab_count = 0
-time_list = []
-new_flag = False
-def tap_callback():
-    global time_list, bpm, scale
-    new_flag = True
-    time_list.append(time.time())
-    # print(time_list)
-    if len(time_list) > 1:
-        if time_list[-1] - time_list[-2] > 3:
-            time_list = []
-        else:
-            if len(time_list) < 6:
-                interval = (time_list[-1] - time_list[0]) / (len(time_list) - 1)
-            else:
-                # Use the last 5 intervals to estimate tempo
-                interval = (time_list[-1] - time_list[-6]) / (6 - 1)
-            bpm = int(60/interval)
-            if bpm > speed_range[-1]:
-                bpm = speed_range[-1]
-            scale.set(bpm) 
-            update_speed_name()
-    # print(bpm)
-
-count_label =tk.Label(rightFrame, text=num_counts[0], fg='#FFFFE6', bg ='#52767D', width=3, font=(theme_fonts[0], 180, 'bold'), justify='left')
-count_label.pack(fill='both', expand=1)
-
-
-
-window.after(1, metronome)
+window.after(interval_ms, play)
 window.mainloop()
