@@ -53,10 +53,13 @@ marking_label =tk.Label(midFrame, text='Allegretto', font=(theme_fonts[0], 90, '
                       justify='center', fg = theme_colors['text'], bg = theme_colors['label_bg'], anchor='n')
 marking_label.pack(fill='both', expand=1)
 
-markings = {'Largo': [40, 60], 'Adagio': [66 ,76], 'Andante': [76, 108],
-            'Allegretto': [112, 120], 'Allegro': [120, 156], 'Presto':[168, 200],
-            'Prestissimo':[200, 330]}
+#markings = {'Largo': [40, 60], 'Adagio': [66 ,76], 'Andante': [76, 108],
+#            'Allegretto': [112, 120], 'Allegro': [120, 156], 'Presto':[168, 200],
+#            'Prestissimo':[200, 330]}
 
+markings = {'最缓板': [40, 60], '柔板': [66 ,76], '行板': [76, 108], 
+             '小快板': [112, 120], '快板': [120, 156],'急板':[168, 200],
+             '最急板':[200, 330]}
 
 # Variable for the scale value
 scale_var = tk.IntVar(midFrame)
@@ -93,6 +96,7 @@ scale = tk.Scale(midFrame,
              activebackground = theme_colors['text'],
              bg = theme_colors['label_bg'],
              sliderlength = 30,
+             width = 25,
              font=(theme_fonts[0]),
              variable=scale_var,
              command=update)
