@@ -1,13 +1,30 @@
 #!/bin/sh
-rm -r build dist/*
+# Ref.: https://www.pythonguis.com/tutorials/packaging-pyqt5-applications-pyinstaller-macos-dmg/
 
+rm -rf build dist/*
+
+#################################################
 # Create app file using pyinstaller
-pyinstaller --name 'Huanbu' --icon 'huanbu.ico' --windowed  --add-data='strong_beat.wav:.' --add-data='sub_strong_beat.wav:.' --add-data='weak_beat.wav:.' huanbu.py
+#################################################
 
-# Create a folder (named dmg) to prepare our DMG in (if it doesn't already exist).
+pyinstaller --name 'Huanbu' \
+            --icon 'huanbu.ico' \
+            --windowed  \
+            --add-data='./strong_beat.wav:.' \
+            --add-data='./sub_strong_beat.wav:.' \
+            --add-data='./weak_beat.wav:.' \
+            huanbu.py
+
+
+#################################################
+# Build the application bundle into a disk image
+#################################################
+
+# Create a folder (named dmg) to prepare our DMG in 
+# (if it doesn't already exist).
 mkdir -p dist/dmg
 # Empty the dmg folder.
-rm -r dist/dmg/*
+rm -rf dist/dmg/*
 # Copy the app bundle to the dmg folder.
 cp -r "dist/Huanbu.app" dist/dmg
 # If the DMG already exists, delete it.
