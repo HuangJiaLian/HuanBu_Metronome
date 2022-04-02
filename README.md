@@ -11,7 +11,7 @@ several features:
 
 ## Download
 
-You can donwload huanbu in the [release page](https://github.com/HuangJiaLian/HuanBu_Metronome/releases).
+You can donwload it in the [release page](https://github.com/HuangJiaLian/HuanBu_Metronome/releases).
 
 ## Usage
 - Space: Play/Pause 
