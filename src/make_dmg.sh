@@ -1,5 +1,11 @@
 #!/bin/sh
-# Ref.: https://www.pythonguis.com/tutorials/packaging-pyqt5-applications-pyinstaller-macos-dmg/
+# This script is used to create the disk 
+# image installer on macOS. To run this 
+# script you should install pyinstaller
+# and create-dmg first by using:
+
+# pip install pyinstaller
+# brew install create-dmg
 
 rm -rf build dist/*
 
