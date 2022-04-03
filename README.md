@@ -6,6 +6,7 @@ Huanbu, an easy-to-use and full functional metronome with simple design. It supp
 several features:
 - A cross-platform application based on Python, which supports Windows, macOS and Linux.
 - Multiple options for different time signatures covers the most common used cases.
+- Tempo estimation
 - Big labels to show tempo marks and click counter.
 - Handy shortcuts.
 
