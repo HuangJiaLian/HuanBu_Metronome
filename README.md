@@ -21,4 +21,13 @@ You can donwload it in the [release page](https://github.com/HuangJiaLian/HuanBu
 - T: Tap Estimate
 - M: Change Time Signature Mode 
 
+## Run source code
+If you want to run the python code on you own computer, all you need to do is as follows:
+
+```bash
+pip install simpleaudio
+cd src
+python huanbu.py
+```
+
 If you are interested in how to build this app, you can check [this article](https://medium.com/@jackhuang.wz/building-a-metronome-in-python-c8e16826fe4f).
