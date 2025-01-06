@@ -1,33 +1,43 @@
-# Huanbu
-
 ![](https://cdn.jsdelivr.net/gh/HuangJiaLian/DataBase0@master/uPic/2025-01-06-22-30-Huanbu.png)
 
-Huanbu, an easy-to-use and full functional metronome with simple design. It supports
-several features:
-- A cross-platform application based on Python, which supports Windows, macOS and Linux.
-- Multiple options for different time signatures covers the most common used cases.
-- Tempo estimation
-- Big labels to show tempo marks and click counter.
-- Handy shortcuts.
+# Huanbu
+
+Huanbu is a user-friendly, fully-featured metronome designed with simplicity in mind. It is a cross-platform application built with Python, supporting **Windows**, **macOS**, and **Linux**. Whether you're a musician or a casual user, Huanbu makes practicing with precision effortless.
+
+## Features
+- **Cross-Platform**: Works seamlessly on Windows, macOS, and Linux.
+- **Time Signatures**: Supports multiple time signatures to cover the most commonly used cases.
+- **Tempo Estimation**: Easily find your tempo with tap estimation.
+- **Clear Interface**: Big, readable labels display tempo marks and click counts.
+- **Convenient Shortcuts**: Control the metronome effortlessly with handy keyboard shortcuts.
 
 ## Download
+Download the latest version from the [Releases page](https://github.com/HuangJiaLian/HuanBu_Metronome/releases).
 
-You can donwload it in the [release page](https://github.com/HuangJiaLian/HuanBu_Metronome/releases).
+## Keyboard Shortcuts
+- **Space**: Play/Pause
+- **Left/Right Arrow**: Decrease/Increase Tempo by 10 BPM
+- **Up/Down Arrow**: Decrease/Increase Tempo by 1 BPM
+- **T**: Tap Tempo Estimation
+- **M**: Change Time Signature Mode
 
-## Usage
-- Space: Play/Pause 
-- Left/Right: Tempo Down/Up 10
-- Up/Down: Tempo Down/Up 1
-- T: Tap Estimate
-- M: Change Time Signature Mode 
+## Running from Source
+Want to explore the source code or customize the app? Follow these steps to run it on your own computer:
 
-## Run source code
-If you want to run the python code on you own computer, all you need to do is as follows:
-
+1.	Install the required dependency:
 ```bash
 pip install simpleaudio
+```
+
+2. Navigate to the src directory:
+```bash
 cd src
+```
+
+3. Run the application:
+```bash
 python huanbu.py
 ```
 
-If you are interested in how to build this app, you can check [this article](https://medium.com/@jackhuang.wz/building-a-metronome-in-python-c8e16826fe4f).
+Interested in learning how Huanbu was built? Check out [this detailed article](https://medium.com/@jackhuang.wz/building-a-metronome-in-python-c8e16826fe4f) for insights and step-by-step guidance.
+
