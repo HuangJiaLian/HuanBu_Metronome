@@ -1,6 +1,6 @@
 # Huanbu
 
-![](https://cdn.jsdelivr.net/gh/HuangJiaLian/DataBase0@master/uPic/2022_04_01_23_AqeeM9.png)
+![](https://cdn.jsdelivr.net/gh/HuangJiaLian/DataBase0@master/uPic/2025-01-06-22-30-Huanbu.png)
 
 Huanbu, an easy-to-use and full functional metronome with simple design. It supports
 several features:
