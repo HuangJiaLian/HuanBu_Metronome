@@ -1,5 +1,6 @@
 import time, os
 import tkinter as tk
+from tkinter import messagebox
 from tkinter import Frame
 import simpleaudio
 
@@ -17,6 +18,26 @@ defaults = {'tempo': 120, 'scale_length': 550}
 window = tk.Tk()
 window.title('Huanbu Metronome')
 window.geometry('900x300')
+
+###########################
+# Help message
+###########################
+# Create the menu bar
+menu_bar = tk.Menu(window)
+
+# Add the Help menu
+help_menu = tk.Menu(menu_bar, tearoff=0)
+menu_bar.add_cascade(label="Help", menu=help_menu)
+def show_help_overview():
+    messagebox.showinfo("Help - User Guide", 
+        "Welcome to Huanbu Metronome!\n\n"
+        "Here are some tips to help you use the application:\n"
+        "1. Hover over different areas of the app to see helpful tooltips.\n"
+        "2. Use the slider to adjust the tempo.\n"
+        "3. Select a time signature from the left-hand side.\n"
+        "4. The beat counter is displayed on the right.\n"
+        "5. Press 't' to tap tempo, 'space' to start/stop the metronome.")
+help_menu.add_command(label="User guide", command=show_help_overview)
 
 # Three frames are created
 leftFrame = Frame(window)
@@ -117,6 +138,45 @@ def update_time_signature(*args):
     count = 0
 ts_mode.trace('w', update_time_signature)
 
+#####################
+# Create a label for the tooltip
+tooltip_label = tk.Label(midFrame, text='', font=(theme_fonts[0], 14),
+                         justify='center', fg=theme_colors['text'], bg=theme_colors['label_bg'])
+tooltip_label.pack(side='bottom', fill='x')
+
+# Function to show the tooltip
+def show_tooltip(event):
+    tooltip_label.config(text='Drag the slider or use the ARROW keys to adjust the tempo')
+
+# Function to hide the tooltip
+def hide_tooltip(event):
+    tooltip_label.config(text='')
+
+# Function to show tooltip for the right region
+def show_right_tooltip(event):
+    tooltip_label.config(text='Press SPACE to start/pause')
+
+# Function to hide tooltip for the right region
+def hide_right_tooltip(event):
+    tooltip_label.config(text='')
+
+# Function to show tooltip for the left frame
+def show_left_tooltip(event):
+    tooltip_label.config(text='Select a time signature or use M key to change')
+
+# Function to hide tooltip for the left frame
+def hide_left_tooltip(event):
+    tooltip_label.config(text='')
+
+# Function to show tooltip for the center frame
+def show_tempo_tooltip(event):
+    tooltip_label.config(text='Tap T continuously along with your own beat to estimate the tempo')
+
+# Function to hide tooltip for the left frame
+def hide_tempo_tooltip(event):
+    tooltip_label.config(text='')
+#####################
+
 # Time signature selection implementation
 time_signature = time_signatures[ts_mode.get()][-1]
 tempo = 120
@@ -205,11 +265,31 @@ def arrow_right(event):
         tempo += (tempo_range[1]-tempo)
     scale.set(tempo) 
 
+# Bind the slider to show/hide the tooltip
+scale.bind("<Enter>", show_tooltip)
+scale.bind("<Leave>", hide_tooltip)
+# Bind the right region (count_label) to show/hide the tooltip
+count_label.bind("<Enter>", show_right_tooltip)
+count_label.bind("<Leave>", hide_right_tooltip)
+
+# Bind the left frame to show/hide the tooltip
+leftFrame.bind("<Enter>", show_left_tooltip)
+leftFrame.bind("<Leave>", hide_left_tooltip)
+
+# Bind the tempo label to show/hide the tooltip
+tempo_label.bind("<Enter>", show_tempo_tooltip)
+tempo_label.bind("<Leave>", hide_tempo_tooltip)
+
+marking_label.bind("<Enter>", show_tempo_tooltip)
+marking_label.bind("<Leave>", hide_tempo_tooltip)
+
 window.bind("<Key>",key_pressed)
 window.bind('<Down>', arrow_down)
 window.bind('<Up>', arrow_up)
 window.bind('<Left>', arrow_left)
 window.bind('<Right>', arrow_right)
 
+# Display the menu bar
+window.config(menu=menu_bar)
 window.after(interval_ms, play)
 window.mainloop()
